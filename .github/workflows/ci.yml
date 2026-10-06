@@ -15,8 +15,14 @@ jobs:
       - name: Unit tests
         run: python -m unittest discover -s tests -v
       - name: Safety guard
+        shell: bash
         run: |
-          ! grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' simulator tests || true
-          grep -Rni 'REAL_PHONE_TRANSPORT=false' README.md
+          set -euo pipefail
+          if grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' simulator tests; then
+            echo "Forbidden messaging/browser transport dependency found in simulator source."
+            exit 1
+          fi
+          grep -Rni 'REAL_PHONE_TRANSPORT=false' simulator
+          grep -Rni 'NETWORK_TRANSPORT=false' simulator
       - name: Smoke test
         run: python -m simulator --scenario retry-storm --messages 1000 --failure-rate 0.05
