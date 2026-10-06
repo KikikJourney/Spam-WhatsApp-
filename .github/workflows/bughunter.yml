@@ -1,0 +1,37 @@
+name: Bug Hunter CI
+
+on:
+  push:
+    paths:
+      - "hunter/**"
+      - "tests/**"
+      - "bughunter.yml"
+      - ".github/workflows/bughunter.yml"
+  pull_request:
+    paths:
+      - "hunter/**"
+      - "tests/**"
+      - "bughunter.yml"
+      - ".github/workflows/bughunter.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m unittest discover -s tests -v
+
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject real messaging transport
+        run: |
+          ! grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' hunter tests || true
+          grep -Rni 'REAL_PHONE_TRANSPORT = False' simulator/fixture.py
+          grep -Rni 'NETWORK_TRANSPORT = False' simulator/fixture.py
+          ! grep -RniE 'requests\.(post|put)|urllib\.request\.(urlopen|Request)' hunter | grep -E 'whatsapp|message|send' || true
