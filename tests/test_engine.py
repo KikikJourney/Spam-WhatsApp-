@@ -3,6 +3,7 @@ import unittest
 from simulator.engine import run
 from simulator.models import SimulationConfig
 
+
 class EngineTests(unittest.TestCase):
     def test_zero_messages(self):
         r = run(SimulationConfig(messages=0))
@@ -26,6 +27,12 @@ class EngineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run(SimulationConfig(rate=0))
 
+    def test_rate_is_workload_configuration(self):
+        a = run(SimulationConfig(messages=100, rate=10))
+        b = run(SimulationConfig(messages=100, rate=10000))
+        self.assertEqual(a.generated, b.generated)
+        self.assertEqual(a.processed, b.processed)
+
     def test_deterministic_core(self):
         cfg = SimulationConfig(messages=100, failure_rate=0.1, duplicate_rate=0.2)
         a, b = run(cfg), run(cfg)
@@ -36,6 +43,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(a.duplicates, b.duplicates)
         self.assertEqual(a.dropped, b.dropped)
         self.assertEqual(a.latency_ms, b.latency_ms)
+
 
 if __name__ == "__main__":
     unittest.main()
