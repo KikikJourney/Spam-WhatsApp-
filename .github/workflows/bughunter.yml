@@ -5,13 +5,11 @@ on:
     paths:
       - "hunter/**"
       - "tests/**"
-      - "bughunter.yml"
       - ".github/workflows/bughunter.yml"
   pull_request:
     paths:
       - "hunter/**"
       - "tests/**"
-      - "bughunter.yml"
       - ".github/workflows/bughunter.yml"
   workflow_dispatch:
 
@@ -31,7 +29,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Reject real messaging transport
         run: |
-          ! grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' hunter tests || true
+          if grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' hunter tests; then
+            echo "Forbidden real-messaging integration detected."
+            exit 1
+          fi
           grep -Rni 'REAL_PHONE_TRANSPORT = False' simulator/fixture.py
           grep -Rni 'NETWORK_TRANSPORT = False' simulator/fixture.py
-          ! grep -RniE 'requests\.(post|put)|urllib\.request\.(urlopen|Request)' hunter | grep -E 'whatsapp|message|send' || true
+          if grep -RniE 'requests\.(post|put)|urllib\.request\.(urlopen|Request)' hunter | grep -Ei 'whatsapp|message|send'; then
+            echo "Forbidden messaging transport pattern detected."
+            exit 1
+          fi
