@@ -3,17 +3,23 @@ import json
 
 from .engine import run, summary
 from .models import SimulationConfig
+from .delivery import run_delivery_proof, proof_summary
 
 
 def main():
     parser = argparse.ArgumentParser(description="Local-only message traffic load simulator")
-    parser.add_argument("--scenario", choices=["burst", "sustained", "duplicates", "retry-storm"], default="burst")
+    parser.add_argument("--scenario", choices=["burst", "sustained", "duplicates", "retry-storm", "delivery-proof"], default="burst")
     parser.add_argument("--messages", type=int, default=100)
     parser.add_argument("--rate", type=int, default=100)
     parser.add_argument("--failure-rate", type=float, default=0.0)
     parser.add_argument("--duplicate-rate", type=float, default=0.0)
     parser.add_argument("--retry-limit", type=int, default=2)
+    parser.add_argument("--delivery-count", type=int, default=3, help="Synthetic delivery-proof event count; 1 is the minimum and 10000 is supported.")
     args = parser.parse_args()
+
+    if args.scenario == "delivery-proof":
+        print(json.dumps(proof_summary(run_delivery_proof(args.delivery_count)), indent=2))
+        return
 
     cfg = SimulationConfig(
         scenario=args.scenario,
