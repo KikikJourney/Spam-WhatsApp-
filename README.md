@@ -1,35 +1,38 @@
 # Scoped Bug Hunter
 
-This repository has been rebuilt as a scope-first bug-hunting toolkit for authorized security research. The former WhatsApp traffic simulator is no longer the primary workflow.
+This repository is now a scope-first bug-hunting workspace. The previous WhatsApp traffic simulator is retired from the primary workflow.
 
-## Operating model
+## Profit target
 
-1. Define an explicitly authorized target.
-2. Run non-destructive passive checks.
-3. Capture evidence and confidence.
-4. Manually validate before submission.
-5. Report only through the program's approved channel.
+The objective is to find valid, in-scope vulnerabilities and submit them through the program's approved channel for bounty payment. The target payment preference is crypto; programs are selected only when their published terms support a compatible payout.
 
-Bug-bounty programs require researchers to stay within published target scope and testing rules. Out-of-scope testing can make a report ineligible and can affect platform access.
+A payout wallet is never committed to this public repository. Keep the payout address in a private account/platform payout setting or an untracked local secret.
 
-## Current checks
+## Current crypto-bounty targets
 
-- HSTS, CSP, X-Content-Type-Options, and Referrer-Policy checks.
-- Wildcard CORS detection.
-- Basic HTTP status observation.
-- URL and scope validation.
+- Symbiosis / Immunefi — published maximum bounty $100,000 and explicitly supports USDT(BEP20), USDT(ERC20), USDC(ERC20), and USDC(Polygon). Its rules require PoC for all severities and require local-fork testing rather than testing deployed mainnet/public-testnet code.
+- Tether — published bounty program; rewards are denominated in USD and may be paid in USDt, Bitcoin, or another digital token at Tether's discretion. Do not assume a particular network.
+- Lido / Immunefi — publishes rewards payable in USDT and other stablecoins; exact network/payment terms must be confirmed before submission.
 
-The hunter does not brute-force, exploit, flood, bypass authentication, or attack unspecified third-party systems.
+## Hunter workflow
+
+scope -> passive discovery -> evidence -> manual validation -> severity -> report draft -> submit
+
+The engine is deliberately non-destructive. It does not brute-force, flood, exploit third-party systems, bypass authentication, or scan assets that are not explicitly authorized.
 
 ## Run
 
     python -m unittest discover -s tests -v
     python -m hunter --target https://YOUR-AUTHORIZED-TARGET.example --name my-target
 
-Only use an asset explicitly listed as in-scope by the applicable bounty program.
+Only use an asset after confirming it is in scope and that the program permits the planned testing method.
 
-## Reporting
+## Money rule
 
-A useful finding should contain target, affected component, reproduction steps, evidence or PoC, impact, and remediation. Manually validate findings before submission.
+No bounty is counted as revenue until the program confirms the finding as valid and awards payment. Duplicate, informational, out-of-scope, or unverified reports are not treated as profit.
 
-Do not publicly disclose private-program findings without program permission; follow the program's disclosure policy.
+## Evidence standard
+
+Every serious candidate should have: exact in-scope asset, affected component, minimal reproduction, evidence/PoC, concrete impact, severity rationale, remediation, program-specific policy check, submission reference, and final bounty status.
+
+The repository contains no private payout wallet, API token, session cookie, or platform credential.
