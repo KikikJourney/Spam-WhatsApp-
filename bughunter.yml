@@ -1,0 +1,5 @@
+targets:
+  - name: example-owned-app
+    base_url: https://example.com
+    in_scope: false
+    notes: Replace only with an explicitly authorized target.
