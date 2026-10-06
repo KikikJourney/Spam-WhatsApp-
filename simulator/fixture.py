@@ -4,8 +4,8 @@ This value is intentionally data-only. No transport code imports it for delivery
 """
 
 TARGET_PHONE = "+6285722907443"
-REAL_PHONE_TRANSPORT = True
-NETWORK_TRANSPORT = True
+REAL_PHONE_TRANSPORT = False
+NETWORK_TRANSPORT = False
 
 
 def masked_target() -> str:
