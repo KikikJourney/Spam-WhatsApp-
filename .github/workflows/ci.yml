@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -12,17 +13,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+
       - name: Safety guard
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' simulator tests; then
-            echo "Forbidden messaging/browser transport dependency found in simulator source."
+          if grep -RniE 'api\.whatsapp|web\.whatsapp|wa\.me|twilio|selenium|playwright|whatsapp-web' simulator hunter tests; then
+            echo "Forbidden real messaging/browser transport dependency found."
             exit 1
           fi
-          grep -Rni 'REAL_PHONE_TRANSPORT = True' simulator
-          grep -Rni 'NETWORK_TRANSPORT = True' simulator
-      - name: Smoke test
+          grep -Rni 'REAL_PHONE_TRANSPORT = False' simulator/fixture.py
+          grep -Rni 'NETWORK_TRANSPORT = False' simulator/fixture.py
+          if grep -RniE 'REAL_PHONE_TRANSPORT = True|NETWORK_TRANSPORT = True' simulator; then
+            echo "Real transport must remain disabled."
+            exit 1
+          fi
+
+      - name: Hunter smoke test
+        run: python -m hunter --target https://example.com --name ci-smoke
+
+      - name: Synthetic simulator smoke test
         run: python -m simulator --scenario retry-storm --messages 1000 --failure-rate 0.05
