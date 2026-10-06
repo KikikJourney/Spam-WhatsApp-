@@ -17,8 +17,14 @@ python -m simulator --scenario burst --messages 10000 --rate 1000
 python -m simulator --scenario sustained --messages 50000 --rate 500
 python -m simulator --scenario duplicates --messages 10000 --rate 1000
 python -m simulator --scenario retry-storm --messages 20000 --rate 1000 --failure-rate 0.05
+python -m simulator --scenario delivery-proof --delivery-count 3
+python -m simulator --scenario delivery-proof --delivery-count 10000
 python -m unittest discover -s tests -v
 ```
+
+## Delivery proof mode
+
+`delivery-proof` is a **synthetic** state-machine test. The minimum proof run is 1 event; the default is 3 events; 10,000 events are supported for stress validation. It reports `accepted → sent → delivered → read` accounting and delivery-latency statistics, but `network_transport` remains `false` by design. Therefore it is not evidence that a real WhatsApp message reached a handset.
 
 ## Scenarios
 
@@ -26,6 +32,7 @@ python -m unittest discover -s tests -v
 - **sustained** — synthetic traffic budget evaluated across the configured rate.
 - **duplicates** — duplicate-event pressure.
 - **retry-storm** — deterministic failure and bounded-retry pressure.
+- **delivery-proof** — synthetic delivery-state accounting; supports small proof runs through 10,000 events.
 
 The workload model follows the same core ideas used by mature load-testing tools such as Locust: configurable request/event volume, rate, failure injection, retries, and measurable outcomes. This repository keeps the transport layer deliberately synthetic.
 
