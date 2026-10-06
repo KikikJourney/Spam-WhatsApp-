@@ -4,8 +4,9 @@ import json
 from .engine import run, summary
 from .models import SimulationConfig
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Local-only WhatsApp traffic simulator")
+    parser = argparse.ArgumentParser(description="Local-only message traffic load simulator")
     parser.add_argument("--scenario", choices=["burst", "sustained", "duplicates", "retry-storm"], default="burst")
     parser.add_argument("--messages", type=int, default=100)
     parser.add_argument("--rate", type=int, default=100)
@@ -22,6 +23,7 @@ def main():
         duplicate_rate=args.duplicate_rate if args.duplicate_rate else (1.0 if args.scenario == "duplicates" else 0.0),
     )
     print(json.dumps(summary(run(cfg)), indent=2))
+
 
 if __name__ == "__main__":
     main()
