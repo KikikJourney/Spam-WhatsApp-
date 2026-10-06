@@ -1,50 +1,35 @@
-# WhatsApp Target Load Simulator
+# Scoped Bug Hunter
 
-Local-only load/flood simulator for testing message-processing behavior against a synthetic transport.
+This repository has been rebuilt as a scope-first bug-hunting toolkit for authorized security research. The former WhatsApp traffic simulator is no longer the primary workflow.
 
-## Safety boundary
+## Operating model
 
-This project does **not** connect to WhatsApp, WhatsApp Web, Meta Cloud API, Twilio, or any external messaging service. It never sends messages.
+1. Define an explicitly authorized target.
+2. Run non-destructive passive checks.
+3. Capture evidence and confidence.
+4. Manually validate before submission.
+5. Report only through the program's approved channel.
 
-The real-number value used for fixture validation is stored only in code under `simulator/fixture.py`. It is never used as a network destination.
+Bug-bounty programs require researchers to stay within published target scope and testing rules. Out-of-scope testing can make a report ineligible and can affect platform access.
 
-All generated traffic is processed by an in-memory simulator.
+## Current checks
+
+- HSTS, CSP, X-Content-Type-Options, and Referrer-Policy checks.
+- Wildcard CORS detection.
+- Basic HTTP status observation.
+- URL and scope validation.
+
+The hunter does not brute-force, exploit, flood, bypass authentication, or attack unspecified third-party systems.
 
 ## Run
 
-```bash
-python -m simulator --scenario burst --messages 10000 --rate 1000
-python -m simulator --scenario sustained --messages 50000 --rate 500
-python -m simulator --scenario duplicates --messages 10000 --rate 1000
-python -m simulator --scenario retry-storm --messages 20000 --rate 1000 --failure-rate 0.05
-python -m simulator --scenario delivery-proof --delivery-count 3
-python -m simulator --scenario delivery-proof --delivery-count 10000
-python -m unittest discover -s tests -v
-```
+    python -m unittest discover -s tests -v
+    python -m hunter --target https://YOUR-AUTHORIZED-TARGET.example --name my-target
 
-## Delivery proof mode
+Only use an asset explicitly listed as in-scope by the applicable bounty program.
 
-`delivery-proof` is a **synthetic** state-machine test. The minimum proof run is 1 event; the default is 3 events; 10,000 events are supported for stress validation. It reports `accepted → sent → delivered → read` accounting and delivery-latency statistics, but `network_transport` remains `false` by design. Therefore it is not evidence that a real WhatsApp message reached a handset.
+## Reporting
 
-## Scenarios
+A useful finding should contain target, affected component, reproduction steps, evidence or PoC, impact, and remediation. Manually validate findings before submission.
 
-- **burst** — immediate synthetic burst against the virtual queue.
-- **sustained** — synthetic traffic budget evaluated across the configured rate.
-- **duplicates** — duplicate-event pressure.
-- **retry-storm** — deterministic failure and bounded-retry pressure.
-- **delivery-proof** — synthetic delivery-state accounting; supports small proof runs through 10,000 events.
-
-The workload model follows the same core ideas used by mature load-testing tools such as Locust: configurable request/event volume, rate, failure injection, retries, and measurable outcomes. This repository keeps the transport layer deliberately synthetic.
-
-## Metrics
-
-Generated, processed, failed, retried, duplicates, dropped events, deterministic simulated latency, p50/p95/p99 latency, and benchmark throughput.
-
-## Guarantees
-
-- No WhatsApp transport.
-- No browser automation.
-- No external messaging API.
-- No virtual phone/SIM provisioning.
-- No network calls from the simulator.
-- Fixture phone data is isolated in code and never used for delivery.
+Do not publicly disclose private-program findings without program permission; follow the program's disclosure policy.
